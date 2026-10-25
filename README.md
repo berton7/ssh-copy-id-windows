@@ -6,7 +6,7 @@ A PowerShell equivalent of Linux `ssh-copy-id` for installing a local SSH public
 
 - Windows PowerShell 5.1 or PowerShell 7+
 - The Windows OpenSSH Client (`ssh.exe`)
-- A remote SSH server with `mkdir`, `touch`, `chmod`, `grep`, and `base64`
+- A remote SSH server with `sh`, `mkdir`, `touch`, `chmod`, `grep`, and `base64`
 
 ## Usage
 
@@ -27,7 +27,7 @@ Specify another public key or a non-default SSH port with:
 .\ssh-copy-id.ps1 -IdentityFile "$HOME\.ssh\work_key.pub" -Port 2222 user@server
 ```
 
-The script prompts for SSH authentication as needed, creates the remote `.ssh` directory and `authorized_keys` file, applies standard permissions, and avoids adding a key that is already installed.
+The script prompts for SSH authentication as needed, creates the remote `.ssh` directory and `authorized_keys` file, applies standard permissions, and avoids adding a key that is already installed. It transfers the key as a single line and safely transports its remote setup command.
 
 ## Generate a key
 

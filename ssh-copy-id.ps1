@@ -47,7 +47,23 @@ if ($Target.StartsWith('-')) {
 
 $keyBytes = [System.Text.Encoding]::UTF8.GetBytes($publicKey)
 $encodedKey = [Convert]::ToBase64String($keyBytes)
-$remoteCommand = 'umask 077; mkdir -p "$HOME/.ssh" && touch "$HOME/.ssh/authorized_keys" && chmod 700 "$HOME/.ssh" && chmod 600 "$HOME/.ssh/authorized_keys" && key=$(printf ''%s'' ''' + $encodedKey + ''' | base64 -d) && if grep -qxF -- "$key" "$HOME/.ssh/authorized_keys"; then printf ''Public key is already installed.\n''; else printf ''%s\n'' "$key" >> "$HOME/.ssh/authorized_keys" && printf ''Public key installed.\n''; fi'
+$remoteScript = @(
+    'set -e'
+    'umask 077'
+    'mkdir -p "$HOME/.ssh"'
+    'touch "$HOME/.ssh/authorized_keys"'
+    'chmod 700 "$HOME/.ssh"'
+    'chmod 600 "$HOME/.ssh/authorized_keys"'
+    ('key=$(printf ''%s'' ''{0}'' | base64 -d)' -f $encodedKey)
+    'if grep -qxF -- "$key" "$HOME/.ssh/authorized_keys"; then'
+    '    printf ''Public key is already installed.\n'''
+    'else'
+    '    printf ''%s\n'' "$key" >> "$HOME/.ssh/authorized_keys"'
+    '    printf ''Public key installed.\n'''
+    'fi'
+) -join "`n"
+$encodedScript = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($remoteScript))
+$remoteCommand = "printf %s $encodedScript | base64 -d | sh"
 
 $sshArgs = @()
 if ($Port -ne 22) {
